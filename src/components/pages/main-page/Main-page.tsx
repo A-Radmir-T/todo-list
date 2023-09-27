@@ -4,6 +4,7 @@ import { todosService } from '../../../shared/services/todos.service'
 import { findTasks, sortTasks } from '../../../shared/utils'
 import { MainPageLayout } from './Main-page-layout'
 import { useDebounce } from '../../../hooks'
+import { MainContext } from '../../../contexts'
 
 export const MainPage = () => {
 	const [isLoading, setIsLoading] = useState(false)
@@ -61,16 +62,19 @@ export const MainPage = () => {
 	}
 
 	return (
-		<MainPageLayout
-			preparedTodos={prepareTodos}
-			searchValue={searchValue}
-			onChangeSearch={handleChangeSearch}
-			isSorted={isSorted}
-			setIsSorted={setIsSorted}
-			isCreateTask={isCreateTask}
-			setIsCreateTask={setIsCreateTask}
-			handleCreateTask={handleCreateTask}
-			isLoading={isLoading}
-		/>
+		<MainContext.Provider
+			value={{ handleCreateTask, onCloseModal: () => setIsCreateTask(false) }}
+		>
+			<MainPageLayout
+				preparedTodos={prepareTodos}
+				searchValue={searchValue}
+				onChangeSearch={handleChangeSearch}
+				isSorted={isSorted}
+				setIsSorted={setIsSorted}
+				isCreateTask={isCreateTask}
+				setIsCreateTask={setIsCreateTask}
+				isLoading={isLoading}
+			/>
+		</MainContext.Provider>
 	)
 }

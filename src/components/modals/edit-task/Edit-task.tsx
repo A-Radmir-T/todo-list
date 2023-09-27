@@ -1,15 +1,12 @@
 import { useForm } from 'react-hook-form'
 import { Modal } from '../modal/Modal'
 import { ITask } from '../../../shared/interfaces/'
-import { useEffect } from 'react'
+import { useContext, useEffect } from 'react'
+import { TaskContext } from '../../../contexts'
 
-interface EditTaskProps {
-	task: ITask
-	handleUpdateTask: (data: ITask) => void
-	onCloseModal: () => void
-}
+export const EditTask = () => {
+	const { task, handleUpdateTask, onCloseModal } = useContext(TaskContext)
 
-export const EditTask = ({ task, handleUpdateTask, onCloseModal }: EditTaskProps) => {
 	const {
 		handleSubmit,
 		register,
@@ -17,7 +14,7 @@ export const EditTask = ({ task, handleUpdateTask, onCloseModal }: EditTaskProps
 		formState: { errors },
 	} = useForm({
 		defaultValues: {
-			title: task.title,
+			title: task?.title || '',
 		},
 		mode: 'onChange',
 	})

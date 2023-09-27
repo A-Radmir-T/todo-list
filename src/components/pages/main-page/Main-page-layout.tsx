@@ -15,7 +15,6 @@ interface MainLayoutProps {
 	setIsSorted: Dispatch<SetStateAction<boolean>>
 	isCreateTask: boolean
 	setIsCreateTask: Dispatch<SetStateAction<boolean>>
-	handleCreateTask: (newTask: ITask) => void
 	isLoading: boolean
 }
 
@@ -27,7 +26,6 @@ export const MainPageLayout = ({
 	setIsSorted,
 	isCreateTask,
 	setIsCreateTask,
-	handleCreateTask,
 	isLoading,
 }: MainLayoutProps) => {
 	return (
@@ -72,12 +70,7 @@ export const MainPageLayout = ({
 							+
 						</button>
 
-						{isCreateTask && (
-							<CreateTask
-								handleCreateTask={handleCreateTask}
-								onCloseModal={() => setIsCreateTask(false)}
-							/>
-						)}
+						{isCreateTask && <CreateTask />}
 					</div>
 				</div>
 			</div>

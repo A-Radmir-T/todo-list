@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { todosService } from '../../../shared/services/todos.service'
 import { ITask } from '../../../shared/interfaces'
 import { TaskPageLayout } from './Task-page-layout'
+import { TaskContext } from '../../../contexts'
 
 export const TaskPage = () => {
 	const [task, setTask] = useState<ITask | null>(null)
@@ -38,16 +39,23 @@ export const TaskPage = () => {
 		})
 	}
 
+	const onCloseModal = () => {
+		setIsDelete(false)
+		setIsEdit(false)
+	}
+
 	return (
-		<TaskPageLayout
-			task={task}
-			isEdit={isEdit}
-			setIsEdit={setIsEdit}
-			isDelete={isDelete}
-			setIsDelete={setIsDelete}
-			handleDeleteTask={handleDeleteTask}
-			handleUpdateTask={handleUpdateTask}
-			isLoading={isLoading}
-		></TaskPageLayout>
+		<TaskContext.Provider
+			value={{ task, handleUpdateTask, onCloseModal, handleDeleteTask }}
+		>
+			<TaskPageLayout
+				task={task}
+				isEdit={isEdit}
+				setIsEdit={setIsEdit}
+				isDelete={isDelete}
+				setIsDelete={setIsDelete}
+				isLoading={isLoading}
+			/>
+		</TaskContext.Provider>
 	)
 }

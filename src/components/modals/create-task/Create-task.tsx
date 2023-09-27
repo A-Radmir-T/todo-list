@@ -1,14 +1,11 @@
 import { Modal } from '../modal/Modal'
 import { useForm } from 'react-hook-form'
 import { ITask } from '../../../shared/interfaces/'
-import { useEffect } from 'react'
+import { useContext, useEffect } from 'react'
+import { MainContext } from '../../../contexts'
 
-interface EditTaskProps {
-	handleCreateTask: (data: ITask) => void
-	onCloseModal: () => void
-}
-
-export const CreateTask = ({ handleCreateTask, onCloseModal }: EditTaskProps) => {
+export const CreateTask = () => {
+	const { handleCreateTask, onCloseModal } = useContext(MainContext)
 	const {
 		handleSubmit,
 		register,

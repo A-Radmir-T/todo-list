@@ -1,14 +1,14 @@
 import { Modal } from '../modal/Modal'
+import { useContext } from 'react'
+import { TaskContext } from '../../../contexts'
 
-interface DeleteTaskProps {
-	id: string
-	handleDeleteTask: (id: string) => void
-	onCloseModal: () => void
-}
-export const DeleteTask = ({ id, handleDeleteTask, onCloseModal }: DeleteTaskProps) => {
+export const DeleteTask = () => {
+	const { task, handleDeleteTask, onCloseModal } = useContext(TaskContext)
 	const onSubmit = (event: any) => {
 		event.preventDefault()
-		handleDeleteTask(id)
+		if (task?.id) {
+			handleDeleteTask(task.id)
+		}
 	}
 
 	return (

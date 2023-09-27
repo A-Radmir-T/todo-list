@@ -16,8 +16,6 @@ interface TaskPageLayoutProps {
 	setIsEdit: Dispatch<SetStateAction<boolean>>
 	isDelete: boolean
 	setIsDelete: Dispatch<SetStateAction<boolean>>
-	handleDeleteTask: (id: string) => void
-	handleUpdateTask: (data: ITask) => void
 	isLoading: boolean
 }
 
@@ -27,8 +25,6 @@ export const TaskPageLayout = ({
 	setIsEdit,
 	isDelete,
 	setIsDelete,
-	handleDeleteTask,
-	handleUpdateTask,
 	isLoading,
 }: TaskPageLayoutProps) => {
 	return (
@@ -55,20 +51,8 @@ export const TaskPageLayout = ({
 				</div>
 			</div>
 			{task && <Task task={task} />}
-			{isDelete && task && (
-				<DeleteTask
-					id={task.id || ''}
-					handleDeleteTask={handleDeleteTask}
-					onCloseModal={() => setIsDelete(false)}
-				/>
-			)}
-			{isEdit && task && (
-				<EditTask
-					task={task}
-					handleUpdateTask={handleUpdateTask}
-					onCloseModal={() => setIsEdit(false)}
-				/>
-			)}
+			{isDelete && task && <DeleteTask />}
+			{isEdit && task && <EditTask />}
 		</div>
 	)
 }

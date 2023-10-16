@@ -1,53 +1,67 @@
 import { useNavigate, useParams } from 'react-router-dom'
-import { useEffect, useState } from 'react'
-import { todosService } from '../../../shared/services/todos.service'
-import { ITask } from '../../../shared/interfaces'
-import { TaskPageLayout } from './Task-page-layout'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { ThunkDispatch } from 'redux-thunk'
+import { AppActions, IState } from '../../../redux/types'
+import { selectIsDelete, selectIsEdit, selectTask } from '../../../redux/selectors'
+import { getTaskById, resetState } from '../../../redux/actions/todo-actions'
+import styles from './Task-page.module.scss'
+import { IoArrowBackOutline } from 'react-icons/io5'
+import { FiEdit3 } from 'react-icons/fi'
+import { RiDeleteBin6Line } from 'react-icons/ri'
+import { Task } from '../../task/Task'
+import { DeleteTask } from '../../modals/delete-task/Delete-task'
+import { EditTask } from '../../modals/edit-task/Edit-task'
+import { toggleDelete, toggleEditTask } from '../../../redux/actions/app-actions'
 
 export const TaskPage = () => {
-	const [task, setTask] = useState<ITask | null>(null)
-	const [isEdit, setIsEdit] = useState<boolean>(false)
-	const [isDelete, setIsDelete] = useState<boolean>(false)
-	const [isLoading, setIsLoading] = useState<boolean>(false)
+	const dispatch = useDispatch<ThunkDispatch<IState, unknown, AppActions>>()
+
+	const task = useSelector(selectTask)
+
+	const isDelete = useSelector(selectIsDelete)
+	const isEdit = useSelector(selectIsEdit)
 	const { id } = useParams()
 	const navigate = useNavigate()
 
 	useEffect(() => {
-		todosService.getTaskById(String(id)).then((taskData) => {
-			setTask(taskData)
-		})
+		if (id) {
+			dispatch(getTaskById(id))
+		}
 	}, [])
 
-	const handleUpdateTask = (editedTask: ITask): void => {
-		if (editedTask.title !== task?.title) {
-			setIsLoading(true)
-			todosService
-				.editTask(editedTask)
-				.then((task) => {
-					setTask(task)
-				})
-				.finally(() => setIsLoading(false))
-		}
-
-		setIsEdit(false)
-	}
-
-	const handleDeleteTask = (id: string): void => {
-		todosService.deleteTask(id).then(() => {
-			navigate(-1)
-		})
+	const handleOnClickBack = () => {
+		dispatch(resetState())
+		navigate(-1)
 	}
 
 	return (
-		<TaskPageLayout
-			task={task}
-			isEdit={isEdit}
-			setIsEdit={setIsEdit}
-			isDelete={isDelete}
-			setIsDelete={setIsDelete}
-			handleDeleteTask={handleDeleteTask}
-			handleUpdateTask={handleUpdateTask}
-			isLoading={isLoading}
-		></TaskPageLayout>
+		<div className="container">
+			<div className={styles.actions}>
+				<button onClick={handleOnClickBack}>
+					<IoArrowBackOutline />
+				</button>
+
+				<div className={styles.buttons}>
+					<button
+						className={styles.edit}
+						type="button"
+						onClick={() => dispatch(toggleEditTask(true))}
+					>
+						<FiEdit3 />
+					</button>
+					<button
+						className={styles.delete}
+						type="button"
+						onClick={() => dispatch(toggleDelete(true))}
+					>
+						<RiDeleteBin6Line />
+					</button>
+				</div>
+			</div>
+			{task && <Task task={task} />}
+			{isDelete && task && <DeleteTask id={task.id || ''} />}
+			{isEdit && task && <EditTask task={task} />}
+		</div>
 	)
 }

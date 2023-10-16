@@ -2,13 +2,14 @@ import { Modal } from '../modal/Modal'
 import { useForm } from 'react-hook-form'
 import { ITask } from '../../../shared/interfaces/'
 import { useEffect } from 'react'
+import { useDispatch } from 'react-redux'
+import { ThunkDispatch } from 'redux-thunk'
+import { AppActions, IState } from '../../../redux/types'
+import { createTask } from '../../../redux/actions/todo-actions'
+import { toggleCreateTask } from '../../../redux/actions/app-actions'
 
-interface EditTaskProps {
-	handleCreateTask: (data: ITask) => void
-	onCloseModal: () => void
-}
-
-export const CreateTask = ({ handleCreateTask, onCloseModal }: EditTaskProps) => {
+export const CreateTask = () => {
+	const dispatch = useDispatch<ThunkDispatch<IState, unknown, AppActions>>()
 	const {
 		handleSubmit,
 		register,
@@ -19,7 +20,13 @@ export const CreateTask = ({ handleCreateTask, onCloseModal }: EditTaskProps) =>
 	})
 	const onSubmit = ({ title }: { [key: string]: string }) => {
 		const newTask: ITask = { title }
-		handleCreateTask(newTask)
+		dispatch(createTask(newTask)).finally(() => {
+			onCloseModal()
+		})
+	}
+
+	const onCloseModal = () => {
+		dispatch(toggleCreateTask(false))
 	}
 
 	useEffect(() => {

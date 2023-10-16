@@ -2,14 +2,17 @@ import { useForm } from 'react-hook-form'
 import { Modal } from '../modal/Modal'
 import { ITask } from '../../../shared/interfaces/'
 import { useEffect } from 'react'
+import { useDispatch } from 'react-redux'
+import { updateTask } from '../../../redux/actions/todo-actions'
+import { ThunkDispatch } from 'redux-thunk'
+import { AppActions, IState, ITodosState } from '../../../redux/types'
+import { toggleEditTask } from '../../../redux/actions/app-actions'
 
 interface EditTaskProps {
 	task: ITask
-	handleUpdateTask: (data: ITask) => void
-	onCloseModal: () => void
 }
 
-export const EditTask = ({ task, handleUpdateTask, onCloseModal }: EditTaskProps) => {
+export const EditTask = ({ task }: EditTaskProps) => {
 	const {
 		handleSubmit,
 		register,
@@ -21,9 +24,16 @@ export const EditTask = ({ task, handleUpdateTask, onCloseModal }: EditTaskProps
 		},
 		mode: 'onChange',
 	})
+	const dispatch = useDispatch<ThunkDispatch<IState, unknown, AppActions>>()
 	const onSubmit = (data: ITask) => {
 		const editedTask: ITask = { ...task, ...data }
-		handleUpdateTask(editedTask)
+		dispatch(updateTask(editedTask)).finally(() => {
+			onCloseModal()
+		})
+	}
+
+	const onCloseModal = () => {
+		dispatch(toggleEditTask(false))
 	}
 
 	useEffect(() => {

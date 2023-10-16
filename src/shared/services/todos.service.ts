@@ -3,8 +3,18 @@ import { DATABASE_URL } from '../constants'
 import { ITask } from '../interfaces'
 
 export const todosService = {
-	async getAllTasks(): Promise<ITask[]> {
-		const response = await axios.get(`${DATABASE_URL}/todos`)
+	async getAllTasks(
+		options = {
+			isAlphabetSorting: false,
+			searchPhrase: '',
+		},
+	): Promise<ITask[]> {
+		const sortingParams = options.isAlphabetSorting
+			? '_sort=title&_order=asc'
+			: '_sort=id&_order=asc'
+		const response = await axios.get(
+			`${DATABASE_URL}/todos?${sortingParams}&title_like=${options.searchPhrase}`,
+		)
 		return response.data
 	},
 	async getTaskById(id: string): Promise<ITask> {

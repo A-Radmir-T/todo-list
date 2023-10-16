@@ -1,76 +1,96 @@
-import { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useEffect } from 'react'
 import { ITask } from '../../../shared/interfaces'
-import { todosService } from '../../../shared/services/todos.service'
-import { findTasks, sortTasks } from '../../../shared/utils'
-import { MainPageLayout } from './Main-page-layout'
 import { useDebounce } from '../../../hooks'
+import { useDispatch, useSelector } from 'react-redux'
+import { ThunkDispatch } from 'redux-thunk'
+import { AppActions, IState } from '../../../redux/types'
+import {
+	selectAllTasks,
+	selectIsCreate,
+	selectIsSorted,
+	selectSearchPhrase,
+} from '../../../redux/selectors'
+import { initState, sortTasks } from '../../../redux/actions/todo-actions'
+import { setSearchPhrase } from '../../../redux/actions/todo-actions/set-search-phrase'
+import styles from './Main-page.module.scss'
+import { BsSearch } from 'react-icons/bs'
+import { AiOutlineSortAscending } from 'react-icons/ai'
+import { NavLink } from 'react-router-dom'
+import { CreateTask } from '../../modals/create-task/Create-task'
+import { toggleCreateTask } from '../../../redux/actions/app-actions'
 
 export const MainPage = () => {
-	const [isLoading, setIsLoading] = useState(false)
-	const [isCreateTask, setIsCreateTask] = useState(false)
-	const [foundTodos, setFoundTodos] = useState<ITask[] | null>(null)
-	const [searchValue, setSearchValue] = useState<string>('')
-	const [todosData, setTodosData] = useState<ITask[]>([])
-	const [isSorted, setIsSorted] = useState<boolean>(false)
-	const debouncedValue = useDebounce(searchValue)
+	const dispatch = useDispatch<ThunkDispatch<IState, unknown, AppActions>>()
 
-	let prepareTodos: ITask[] = todosData
-	if (isSorted) prepareTodos = sortTasks(todosData)
-	if (foundTodos) prepareTodos = foundTodos
+	const todosData: ITask[] = useSelector(selectAllTasks) || []
+	const isSorted = useSelector(selectIsSorted)
+	const searchPhrase = useSelector(selectSearchPhrase)
+	const isCreateTask = useSelector(selectIsCreate)
+	const debouncedValue = useDebounce(searchPhrase)
 
 	useEffect(() => {
-		setIsLoading(true)
-		todosService
-			.getAllTasks()
-			.then((data) => {
-				setTodosData(data)
-			})
-			.finally(() => setIsLoading(false))
+		if (!todosData.length) {
+			dispatch(initState())
+		}
 	}, [])
 
 	useEffect(() => {
-		if (searchValue) {
-			const found = findTasks(todosData, debouncedValue)
-			setFoundTodos(found)
-			return
-		}
-		setFoundTodos(null)
+		dispatch(initState())
 	}, [debouncedValue])
-
-	const clearSearch = (): void => {
-		setSearchValue('')
-		setFoundTodos(null)
-	}
 
 	const handleChangeSearch = (event: ChangeEvent<HTMLInputElement>): void => {
 		const { value } = event.target
-		setSearchValue(value)
+		dispatch(setSearchPhrase(value))
 	}
-
-	const handleCreateTask = (newTask: ITask): void => {
-		setIsLoading(true)
-		setFoundTodos(null)
-		clearSearch()
-		todosService
-			.createTask(newTask)
-			.then((newTask) => {
-				setTodosData([...todosData, newTask])
-			})
-			.finally(() => setIsLoading(false))
-		setIsCreateTask(false)
+	const handleSort = (): void => {
+		dispatch(sortTasks())
 	}
 
 	return (
-		<MainPageLayout
-			preparedTodos={prepareTodos}
-			searchValue={searchValue}
-			onChangeSearch={handleChangeSearch}
-			isSorted={isSorted}
-			setIsSorted={setIsSorted}
-			isCreateTask={isCreateTask}
-			setIsCreateTask={setIsCreateTask}
-			handleCreateTask={handleCreateTask}
-			isLoading={isLoading}
-		/>
+		<>
+			<div>
+				<div className="container">
+					<div className={styles.todos}>
+						<div className={styles.search}>
+							<input
+								type="text"
+								placeholder="Поиск задачи"
+								value={searchPhrase}
+								onChange={handleChangeSearch}
+							/>
+							<div className={styles.searchIcon}>
+								<BsSearch />
+							</div>
+						</div>
+
+						<div className={styles.sort}>
+							<button className={isSorted ? styles.active : ''} onClick={handleSort}>
+								<AiOutlineSortAscending />
+							</button>
+						</div>
+
+						<div className={styles.links}>
+							{todosData.length ? (
+								todosData.map((task, index) => (
+									<NavLink key={task.id} to={`/task/${task.id}`}>
+										{task.title}
+									</NavLink>
+								))
+							) : (
+								<div className={styles.void}>Пусто</div>
+							)}
+						</div>
+						<button
+							className={styles.createTask}
+							onClick={() => dispatch(toggleCreateTask(true))}
+						>
+							+
+						</button>
+
+						{isCreateTask && <CreateTask />}
+					</div>
+				</div>
+			</div>
+		</>
 	)
 }
